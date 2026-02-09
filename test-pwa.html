@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PWA - Diagnostic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        
+        .check-item {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .section {
+            margin: 30px 0;
+        }
+        
+        .icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="icon">🔍</span>Diagnostic PWA</h1>
+        <p style="color: #666; margin-bottom: 30px;">Vérification de l'installation de ton application Progressive Web App</p>
+        
+        <div class="section">
+            <h2>📋 Checklist PWA</h2>
+            <div id="checks"></div>
+        </div>
+        
+        <div class="section">
+            <h2>🛠️ Actions</h2>
+            <button onclick="testServiceWorker()">🔄 Tester Service Worker</button>
+            <button onclick="testManifest()">📄 Tester Manifest</button>
+            <button onclick="testCache()">💾 Tester Cache</button>
+            <button onclick="clearCache()">🗑️ Vider le Cache</button>
+            <button onclick="window.location.href='index.html'">🏠 Retour à l'App</button>
+        </div>
+        
+        <div class="section" id="results"></div>
+    </div>
+
+    <script>
+        // Vérifications automatiques au chargement
+        window.addEventListener('load', () => {
+            runAllChecks();
+        });
+
+        function runAllChecks() {
+            const checksContainer = document.getElementById('checks');
+            checksContainer.innerHTML = '';
+            
+            const checks = [
+                checkHTTPS(),
+                checkServiceWorker(),
+                checkManifest(),
+                checkIcons(),
+                checkLocalStorage(),
+                checkSpeechSynthesis()
+            ];
+            
+            checks.forEach(check => {
+                checksContainer.innerHTML += check;
+            });
+        }
+
+        function checkHTTPS() {
+            const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+            return createCheckItem(
+                isSecure,
+                'HTTPS / Localhost',
+                isSecure ? 'Protocole sécurisé détecté' : 'Utilise HTTPS ou localhost pour PWA'
+            );
+        }
+
+        function checkServiceWorker() {
+            const supported = 'serviceWorker' in navigator;
+            return createCheckItem(
+                supported,
+                'Service Worker',
+                supported ? 'Service Worker supporté' : 'Ton navigateur ne supporte pas les Service Workers'
+            );
+        }
+
+        function checkManifest() {
+            const manifestLink = document.querySelector('link[rel="manifest"]');
+            const hasManifest = manifestLink !== null;
+            return createCheckItem(
+                hasManifest,
+                'Web App Manifest',
+                hasManifest ? 'Manifest.json trouvé' : 'Manifest.json non trouvé dans index.html'
+            );
+        }
+
+        function checkIcons() {
+            // On ne peut pas vraiment vérifier sans faire des requêtes
+            return createCheckItem(
+                true,
+                'Icônes PWA',
+                'Vérifie que le dossier icons/ contient 8 fichiers PNG',
+                'info'
+            );
+        }
+
+        function checkLocalStorage() {
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                return createCheckItem(
+                    true,
+                    'LocalStorage',
+                    'LocalStorage disponible pour sauvegarder ta progression'
+                );
+            } catch (e) {
+                return createCheckItem(
+                    false,
+                    'LocalStorage',
+                    'LocalStorage non disponible (navigation privée ?)'
+                );
+            }
+        }
+
+        function checkSpeechSynthesis() {
+            const supported = 'speechSynthesis' in window;
+            return createCheckItem(
+                supported,
+                'Synthèse Vocale',
+                supported ? 'Synthèse vocale disponible' : 'Synthèse vocale non supportée'
+            );
+        }
+
+        function createCheckItem(success, title, message, type = null) {
+            const status = type || (success ? 'success' : 'error');
+            const icon = success ? '✅' : '❌';
+            return `
+                <div class="check-item">
+                    <strong>${icon} ${title}</strong>
+                    <div class="status ${status}">
+                        ${message}
+                    </div>
+                </div>
+            `;
+        }
+
+        function testServiceWorker() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h3>🔄 Test du Service Worker...</h3>';
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations()
+                    .then(registrations => {
+                        if (registrations.length > 0) {
+                            results.innerHTML += `
+                                <div class="status success">
+                                    ✅ Service Worker actif !<br>
+                                    <strong>État :</strong> ${registrations[0].active ? 'Actif' : 'En attente'}<br>
+                                    <strong>Scope :</strong> <code>${registrations[0].scope}</code>
+                                </div>
+                            `;
+                        } else {
+                            results.innerHTML += `
+                                <div class="status warning">
+                                    ⚠️ Aucun Service Worker enregistré.<br>
+                                    Retourne sur index.html pour l'initialiser.
+                                </div>
+                            `;
+                        }
+                    });
+            } else {
+                results.innerHTML += '<div class="status error">❌ Service Worker non supporté</div>';
+            }
+        }
+
+        function testManifest() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h3>📄 Test du Manifest...</h3>';
+            
+            fetch('manifest.json')
+                .then(response => response.json())
+                .then(data => {
+                    results.innerHTML += `
+                        <div class="status success">
+                            ✅ Manifest chargé avec succès !<br>
+                            <strong>Nom :</strong> ${data.name}<br>
+                            <strong>Nom court :</strong> ${data.short_name}<br>
+                            <strong>Couleur :</strong> <span style="background:${data.theme_color}; padding:3px 10px; border-radius:4px; color:white;">${data.theme_color}</span><br>
+                            <strong>Icônes :</strong> ${data.icons.length} définies
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    results.innerHTML += `
+                        <div class="status error">
+                            ❌ Erreur lors du chargement du manifest.json<br>
+                            <code>${error.message}</code>
+                        </div>
+                    `;
+                });
+        }
+
+        function testCache() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h3>💾 Test du Cache...</h3>';
+            
+            if ('caches' in window) {
+                caches.keys()
+                    .then(cacheNames => {
+                        if (cacheNames.length > 0) {
+                            results.innerHTML += `
+                                <div class="status success">
+                                    ✅ ${cacheNames.length} cache(s) trouvé(s) :<br>
+                                    ${cacheNames.map(name => `<code>${name}</code>`).join('<br>')}
+                                </div>
+                            `;
+                            
+                            // Liste le contenu du premier cache
+                            caches.open(cacheNames[0])
+                                .then(cache => cache.keys())
+                                .then(keys => {
+                                    results.innerHTML += `
+                                        <div class="status info">
+                                            📦 ${keys.length} fichier(s) en cache
+                                        </div>
+                                    `;
+                                });
+                        } else {
+                            results.innerHTML += `
+                                <div class="status warning">
+                                    ⚠️ Aucun cache trouvé. Lance l'app depuis index.html d'abord.
+                                </div>
+                            `;
+                        }
+                    });
+            } else {
+                results.innerHTML += '<div class="status error">❌ Cache API non supporté</div>';
+            }
+        }
+
+        function clearCache() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h3>🗑️ Nettoyage du cache...</h3>';
+            
+            if ('caches' in window) {
+                caches.keys()
+                    .then(cacheNames => {
+                        return Promise.all(
+                            cacheNames.map(cacheName => caches.delete(cacheName))
+                        );
+                    })
+                    .then(() => {
+                        results.innerHTML += `
+                            <div class="status success">
+                                ✅ Cache vidé avec succès !<br>
+                                Recharge la page pour recréer le cache.
+                            </div>
+                        `;
+                    })
+                    .catch(error => {
+                        results.innerHTML += `
+                            <div class="status error">
+                                ❌ Erreur : ${error.message}
+                            </div>
+                        `;
+                    });
+            }
+        }
+    </script>
+</body>
+</html>

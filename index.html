@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Apprenez le vietnamien de manière ludique avec des cours interactifs">
+    <meta name="theme-color" content="#E63946">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <title>Apprendre le Vietnamien - Jeu Éducatif</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header avec argent -->
+        <header class="app-header">
+            <div class="money-counter">
+                <i class="fas fa-coins"></i>
+                <span id="money">0</span>
+            </div>
+            <button id="homeBtn" class="home-btn" onclick="showHome()" style="display:none;">
+                <i class="fas fa-home"></i> Accueil
+            </button>
+        </header>
+
+        <!-- Zone principale de l'app -->
+        <main id="app" class="main-content">
+            <!-- Le contenu sera injecté ici par JavaScript -->
+        </main>
+
+        <!-- Footer optionnel -->
+        <footer class="app-footer">
+            <p style="font-size: 0.8rem; color: #666; margin: 0;">
+                Made with ❤️ pour apprendre le vietnamien
+            </p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script>
+        // Enregistrement du Service Worker pour PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker enregistré:', registration);
+                    })
+                    .catch(error => {
+                        console.log('❌ Erreur Service Worker:', error);
+                    });
+            });
+        }
+
+        // Prompt d'installation PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Afficher un bouton d'installation personnalisé si vous le souhaitez
+            console.log('💡 PWA peut être installée !');
+        });
+    </script>
+</body>
+</html>
